@@ -14,9 +14,11 @@ import com.itextpdf.text.pdf.security.PrivateKeySignature;
 import java.io.*;
 import java.security.*;
 import java.security.cert.Certificate;
+import java.util.List;
 
 public class LocationSignature {
-    public void sign(InputStream p12stream,
+    public void sign(File pdfFile,
+                     InputStream p12stream,
                      char[] password,
                      InputStream src,
                      OutputStream dest,
@@ -44,10 +46,19 @@ public class LocationSignature {
         appearance.setReason(reason);
         appearance.setLocation(location);
 
+        //添加：查找关键字位置
+        byte[] pdfData = new byte[(int) pdfFile.length()];
+        try (FileInputStream inputStream = new FileInputStream(pdfFile)) {
+            inputStream.read(pdfData);
+        } catch (IOException e) {
+            throw e;
+        }
+        List<float[]> position = PdfUtils.findKeywordPostions(pdfData, "（公章）");
+
         //设置签名的位置，页码，签名域名称，多次追加签名的时候，签名域名称不能一样
         //签名的位置，是图章相对于pdf页面的位置坐标，原点为pdf页面左下角
         //四个参数的分别是，图章左下角x，图章左下角y，图章右上角x，图章右上角y
-        appearance.setVisibleSignature(new Rectangle(0, 800, 100, 700), 1, "jxblSign");
+        appearance.setVisibleSignature(new Rectangle(position.get(0)[1]-20, position.get(0)[2]+50, position.get(0)[1] + 80, position.get(0)[2] - 50), (int) position.get(0)[0], "jxblSign");
 
         //读取图章图片，这个image是itext包的image
         Image image = Image.getInstance(chapterPath);
@@ -75,7 +86,7 @@ public class LocationSignature {
         String reason = "江西省公共资源交易集团专用电子保函签章";
         String location = "江西南昌";
 
-        locationSignature.sign(new FileInputStream(KEYSTORE), PASSWORD, new FileInputStream(SRC), new FileOutputStream(DEST), reason, location, chapterPath);
+        locationSignature.sign(new File(SRC), new FileInputStream(KEYSTORE), PASSWORD, new FileInputStream(SRC), new FileOutputStream(DEST), reason, location, chapterPath);
         System.out.println("签章完成");
     }
 }
