@@ -78,11 +78,11 @@ public class LocationSignature {
 
     public static void main(String[] args) throws IOException, DocumentException, GeneralSecurityException {
         LocationSignature locationSignature = new LocationSignature();
-        String KEYSTORE = "D:\\jxbl.p12";
+        String KEYSTORE = args[0];
         char[] PASSWORD = "123456".toCharArray();
-        String SRC = "D:\\letterToSign.pdf";
-        String DEST = "D:\\letterSinged.pdf";
-        String chapterPath = "D:\\stamp.png";
+        String SRC = args[1];
+        String DEST = args[2];
+        String chapterPath = args[3];
         String reason = "江西省公共资源交易集团专用电子保函签章";
         String location = "江西南昌";
 
